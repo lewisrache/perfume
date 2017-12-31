@@ -2,17 +2,17 @@
 
 require_once(__DIR__ . "/card.php");
 
-$good_id = 1;
+$good_id = 909090;
 
 $bad_id = 100000;
 
-$card_api = new CardInterface();
+echo "GOOD ID TEST: ";
+if (Card::exists($good_id)) echo "passed\n"; else echo "failed\n";
+echo "BAD ID TEST: ";
+if (!Card::exists($bad_id)) echo "passed\n"; else echo "failed\n";
 
-if ($card_api->exists($good_id)) echo "Good ID test passed\n";
-if (!$card_api->exists($bad_id)) echo "Bad ID test passed\n";
 
-
-$card = new CardModel();
+$card = new Card();
 $card->name = "TEST CARD";
 $card->refnum = 909090;
 $card->text = "This is test text";
@@ -23,15 +23,20 @@ $card->type_str = "Test - Test";
 $card->rarity = "Common";
 $card->set_id = 0;
 
-$card_id = $card_api->create($card);
-if ($card_id > 0) echo "Card create test passed\n";
+//echo "CARD CREATE TEST: ".
+//$card_id = $card->create();
+//if ($card_id > 0) echo "passed\n"; else echo "failed\n";
 
-$card_get = $card_api->getById($good_id);
+$card_get = new Card();
+$card_get->refnum = $good_id;
+$card_get->getById($card_get->getId());
 print_r($card_get);
 
+echo "Get by Bad ID test: ";
 try {
-	$card_api->getById($bad_id);
+	$card_get->getById($bad_id);
+	echo "failed\n";
 } catch(Exception $e) {
-	echo "Get by Bad ID test passed\n";
+	echo "passed\n";
 }
 

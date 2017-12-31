@@ -1,3 +1,6 @@
+<?php
+require_once(__DIR__ . "/api/includes.php");
+?>
 <html>
 <head>
 <meta charset="utf-8">
@@ -23,7 +26,7 @@ $(function() {
 </head>
 <body>
 <?php
-$dir = 'sqlite:mtg.db';
+$dir = 'sqlite:api/mtg.db';
 $dbh  = new PDO($dir) or die("cannot open the database");
 
 if (isset($_POST['card_id']) && isset($_POST['num_own'])) {
@@ -35,26 +38,26 @@ if (isset($_POST['card_id']) && isset($_POST['num_own'])) {
 }
 
 
-$cards = $dbh->query("select card.name, card.id, card.num_own from card order by card.name asc");
+$cards = $dbh->query("select card.name, card.id, card.num_own, sets.code from card, sets where sets.id = card.set_id order by card.name asc");
 $card_id_to_own = array();
 
 if (isset($card_id)) { ?>
 <div class="updated">Updated</div>
 <?php }?>
 <form id="add_card" method="POST">
-	<div class="col-lg-3">
+	<div class="col-lg-3" style="float:left">
 	<select name="card_id" id="card_select" class="chosen-select" onchange="updateOwned()">
 	<?php foreach($cards as $idx => $card) { 
 		$card['num_own'] = ($card['num_own'] == "" ? 0 : $card['num_own']);
 		$card_id_to_own[$card['id']] = $card['num_own'];
 		if (isset($card_id) && $card_id == $card['id']) {
 			$initial_value = $card['num_own'];
-			?><option value="<?= $card['id'] ?>" selected="selected"><?= $card['name'] ?></option><?php
+			?><option value="<?= $card['id'] ?>" selected="selected"><?= $card['name'] . " (" . $card['code'] . ")" ?></option><?php
 		} else {
 			if ($idx === 0) {
 				$initial_value = $card['num_own'];
 			}
-			?><option value="<?= $card['id'] ?>"><?= $card['name'] ?></option><?php
+			?><option value="<?= $card['id'] ?>"><?= $card['name'] . " (" . $card['code'] . ")" ?></option><?php
 		}
 	} ?>
 	</select>
@@ -62,6 +65,18 @@ if (isset($card_id)) { ?>
 	<input type="submit" value="Update">
 	</div>
 </form>
+<div class="col-lg-3" style="float:left">
+<table>
+<tbody>
+<?php
+	$all_sets = Set::getAll();
+	foreach($all_sets as $set) {
+		?><tr><td><?= $set['name'] . " (" . $set['code'] . ")" ?></td></tr>
+	<?php }
+?>
+</tbody>
+</table>
+</div>
 <script>
 var cards_to_numbers = Array();
 <?php foreach($card_id_to_own as $id => $num) { ?>

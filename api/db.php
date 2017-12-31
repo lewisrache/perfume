@@ -6,7 +6,7 @@ class DB {
 
 	public static function getDB() {
 		if (!isset(self::$db)) {
-			$dir = 'sqlite:mtg.db';
+			$dir = 'sqlite:'.__DIR__.'/mtg.db';
 			self::$db = new EnhancedPDO($dir) or die("cannot open the database");
 			self::$db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		}

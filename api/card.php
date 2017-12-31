@@ -4,7 +4,7 @@
 
 require_once(__DIR__ . "/db.php");
 
-class CardModel {
+class Card {
 
 	public $name;
 	public $id;
@@ -20,95 +20,134 @@ class CardModel {
 	public $rarity;
 	public $associated_cards;
 	public $refnum;
-}
+	public $layout;
 
-class CardInterface {
-
-	protected $dbh;
+	protected static $dbh;
 
 	function __construct() {
-		$this->dbh = DB::getDB();
+		self::$dbh = DB::getDB();
 	}
 
-	public function exists($refnum) {
+	public static function exists($refnum) {
+		if (!isset(self::$dbh)) {
+			self::$dbh = DB::getDB();
+		}
 		$query = "SELECT id FROM card WHERE refnum = :refnum";
-		$result = $this->dbh->execQuery($query, array(':refnum'=>$refnum));
+		$result = self::$dbh->execQuery($query, array(':refnum'=>$refnum));
 		return (count($result) > 0);
 	}
 
-	public function create($card) {
-		if ($this->exists($card->refnum)) {
-			throw new Exception("Card ({$card->name}) already exists!");
+	public function create() {
+		if (self::exists($this->refnum)) {
+			throw new Exception("Card ({$this->name}) already exists!");
 		}
 		$query = "INSERT INTO card 
-			(name, refnum, text, flavour, manacost, power, toughness, type, num_own, rarity, set_id)
+			(name, refnum, text, flavour, manacost, power, toughness, type, num_own, rarity, set_id, layout)
 			VALUES
-			(:name, :refnum, :text, :flavour, :manacost, :power, :toughness, :type, :num_own, :rarity, :set_id)";
+			(:name, :refnum, :text, :flavour, :manacost, :power, :toughness, :type, :num_own, :rarity, :set_id, :layout)";
 		$data = array(
-			':name' => $card->name,
-			':refnum' => $card->refnum,
-			':text' => $card->text,
-			':flavour' => $card->flavour,
-			':manacost' => $card->manacost,
-			':power' => $card->power,
-			':toughness' => $card->toughness,
-			':type' => $card->type_str,
+			':name' => $this->name,
+			':refnum' => $this->refnum,
+			':text' => $this->text,
+			':flavour' => $this->flavour,
+			':manacost' => $this->manacost,
+			':power' => $this->power,
+			':toughness' => $this->toughness,
+			':type' => $this->type_str,
 			':num_own' => 0,
-			':rarity' => $card->rarity,
-			':set_id' => $card->set_id
+			':rarity' => $this->rarity,
+			':set_id' => $this->set_id,
+			':layout' => $this->layout
 		);
-		$this->dbh->execQuery($query, $data);
-		$card_id = $this->dbh->lastInsertId();
+		self::$dbh->execQuery($query, $data);
+		$card_id = self::$dbh->lastInsertId();
+		$this->id = $card_id;
 		return $card_id;
 	}
 
-	public function update($card) {
-
+	public function update() {
+		// TODO - gonna assume no updates on input...
 	}
 
-	public function setNumOwned($card_id, $num_owned) {
+	public static function setNumOwned($card_id, $num_owned) {
+		if (!isset(self::$dbh)) {
+			self::$dbh = DB::getDB();
+		}
 		$query = "UPDATE card SET num_own = :num_own WHERE id = :id";
-		$this->dbh->execQuery($query, array(':num_own'=>$num_owned, ':id'=>$card_id));
+		self::$dbh->execQuery($query, array(':num_own'=>$num_owned, ':id'=>$card_id));
 	}
 
 	public function getById($card_id) {
 		$query = "SELECT * FROM card WHERE id = :id";
-		$result = $this->dbh->execQuery($query, array(':id'=>$card_id));
+		$result = self::$dbh->execQuery($query, array(':id'=>$card_id));
 		if (count($result) === 0) {
 			throw new Exception("Card $card_id not found");
 		}
 		$card_data = $result[0];
-		$card = new CardModel();
-		$card->id = $card_data['id'];
-		$card->name = $card_data['name'];
-		$card->refnum = $card_data['refnum'];
-		$card->manacost = $card_data['manacost'];
-		$card->flavour = $card_data['flavour'];
-		$card->text = $card_data['text'];
-		$card->power = $card_data['power'];
-		$card->toughness = $card_data['toughness'];
-		$card->type_str = $card_data['type'];
-		$card->num_own = $card_data['num_own'];
-		$card->rarity = $card_data['rarity'];
-		$card->set_id = $card_data['set_id'];
+		$this->id = $card_data['id'];
+		$this->name = $card_data['name'];
+		$this->refnum = $card_data['refnum'];
+		$this->manacost = $card_data['manacost'];
+		$this->flavour = $card_data['flavour'];
+		$this->text = $card_data['text'];
+		$this->power = $card_data['power'];
+		$this->toughness = $card_data['toughness'];
+		$this->type_str = $card_data['type'];
+		$this->num_own = $card_data['num_own'];
+		$this->rarity = $card_data['rarity'];
+		$this->set_id = $card_data['set_id'];
 
 		$types_query = "SELECT type.id, type.name FROM type, card_types
 			WHERE type.id = card_types.type_id AND card_types.card_id = :id";
-		$types = $this->dbh->execQuery($types_query, array(':id' => $card_id));
-		$card->types = $types;
+		$types = self::$dbh->execQuery($types_query, array(':id' => $card_id));
+		$this->types = $types;
 
-		return $card;
+		return $this;
 	}
 
-	public function getByRefnum($refnum) {
-
+	public function getId() {
+		if (!isset($this->refnum)) {
+			throw new Exception("Must set 'refnum' to get ID");
+		}
+		$query = "SELECT id FROM card WHERE refnum = :ref";
+		$result = self::$dbh->execQuery($query, array(':ref' => $this->refnum));
+		if (count($result) === 0) {
+			throw new Exception("ID not found for refnum {$this->refnum}");
+		}
+		$this->id = $result[0]['id'];
+		return $this->id;
 	}
 
-	public function getAll() {
+	public static function getAll() {
 
 	}
 
 	public function search() {
 
 	}
+
+	public function createOrUpdate() {
+		if (isset($this->id)) {
+			$this->update();
+		} else if (self::exists($this->refnum)) {
+			$this->getId();
+			$this->update();
+		} else {
+			$this->create();
+		}
+		return $this->id;
+	}
+
+	public function addType($type_id) {
+		$query = "INSERT OR IGNORE INTO card_types (card_id, type_id) VALUES (:cid, :tid)";
+		self::$dbh->execQuery($query, array(':cid'=>$this->id, ':tid'=>$type_id));
+		// TODO - add type to type list?
+	}
+
+	public function addColour($colour_id) {
+		$query = "INSERT OR IGNORE INTO card_colours (card_id, colour_id) VALUES (:cid, :tid)";
+		self::$dbh->execQuery($query, array(':cid'=>$this->id, ':tid'=>$colour_id));
+		// TODO - add type to type list?
+	}
+	
 }

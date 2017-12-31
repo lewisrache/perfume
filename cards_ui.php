@@ -103,7 +103,7 @@ if (!isset($_GET['main_type'])) {
 		AND sets.id = card.set_id";
 	$data = array(':id'=>$_GET['main_type']);
 }
-$dir = 'sqlite:mtg.db';
+$dir = 'sqlite:api/mtg.db';
 $dbh  = new PDO($dir) or die("cannot open the database");
 
 $card_selection_stmt = $dbh->prepare($card_selection_query);
