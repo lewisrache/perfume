@@ -20,7 +20,7 @@ if (isset($_GET['import_set'])) {
 		"Ixalan");
 }
 
-$handle = fopen("../../Downloads/AllSets.json", 'r');
+$handle = fopen("data/AllSets.json", 'r');
 
 if ($handle) {
 	$ctr = 0;
