@@ -49,6 +49,7 @@ function filter() {
 			&& texts[i].getAttribute('data-value').toUpperCase().indexOf(text_filter) > -1 
 			&& (mana_show || mana_filter.length == 0)
 			&& (subtype_show || subtype_filter.length == 0)
+			&& (!owned_filter || parseInt(owned[i].getAttribute('data-value')) > 0)
 			) {
 			$('#cards tr:eq('+(i+1)+')').show();
 		} else {
@@ -133,7 +134,7 @@ $subtypes = $dbh->query("select type.id, type.name from type order by type.name 
 	<label for="card_text_filter">Search in card text:</label>
 	<input type="text" id="card_text_filter" onkeyup="filter()" placeholder="Search in card text..." title="card text contains"><br>
 	<label for="only_owned_filter">Show only owned cards</label>
-	<input type="checkbox" id="only_owned_filter"><br>
+	<input type="checkbox" id="only_owned_filter" onchange="filter()"><br>
 	<div class="col-lg-3">
 		<label for="mana_colour">Mana colours:</label>
 		<select id="mana_colour" multiple class='chosen-select' onchange="filter()">
