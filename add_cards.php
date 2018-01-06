@@ -63,13 +63,17 @@ if (isset($card_id)) { ?>
 	</select>
 	<input type="number" id="owned" name="num_own" value="<?= $initial_value ?>">
 	<input type="submit" value="Update">
+
+	<br>
+	<br>
+	<input type="button" onclick="window.location='cards_ui.php'" value="View Library"/>
 	</div>
 </form>
 <div class="col-lg-3" style="float:left">
 <table>
 <tbody>
 <?php
-	$all_sets = Set::getAll();
+	$all_sets = Set::getAll(true);
 	foreach($all_sets as $set) {
 		?><tr><td><?= $set['name'] . " (" . $set['code'] . ")" ?></td></tr>
 	<?php }

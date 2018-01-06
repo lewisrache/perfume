@@ -85,6 +85,37 @@ function filter() {
 .table-striped>tbody>tr.mythic_rare_card:nth-child(odd) {
 	background-color:rgba(243, 149, 53, 0.5);
 }
+/**
+    position: relative;
+    width: 100%;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px;
+*/
+.col-25 {
+    float: left;
+    width: 15%;
+    margin-top: 6px;
+    padding-left: 15px;
+}
+
+.col-75 {
+    float: left;
+    width: 75%;
+    margin-top: 6px;
+    padding-left: 15px;
+}
+.formrow:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+@media (max-width: 600px) {
+    .col-25, .col-75, input[type=submit] {
+        width: 100%;
+        margin-top: 0;
+    }
+}
 </style>
 </head>
 <body>
@@ -128,36 +159,63 @@ $subtypes = $dbh->query("select type.id, type.name from type order by type.name 
 		</select>
 	</form>
 </div>
+<hr>
 <div class="filters">
-	<label for="card_name_filter">Search for card name:</label>
-	<input type="text" id="card_name_filter" onkeyup="filter()" placeholder="Search for card name..." title="card name"><br>
-	<label for="card_text_filter">Search in card text:</label>
-	<input type="text" id="card_text_filter" onkeyup="filter()" placeholder="Search in card text..." title="card text contains"><br>
-	<label for="only_owned_filter">Show only owned cards</label>
-	<input type="checkbox" id="only_owned_filter" onchange="filter()"><br>
-	<div class="col-lg-3">
-		<label for="mana_colour">Mana colours:</label>
-		<select id="mana_colour" multiple class='chosen-select' onchange="filter()">
-			<option value="B">Black</option>
-			<option value="U">Blue</option>
-			<option value="G">Green</option>
-			<option value="R">Red</option>
-			<option value="W">White</option>
-			<option value="NONE">None</option>
-		</select>
+	<div class="formrow">
+		<div class="col-25">
+			<label for="card_name_filter">Search for card name:</label>
+		</div>
+		<div class="col-75">
+			<input type="text" id="card_name_filter" onkeyup="filter()" placeholder="Search for card name..." title="card name"><br>
+		</div>
+	</div>
+	<div class="formrow">
+		<div class="col-25">
+			<label for="card_text_filter">Search in card text:</label>
+		</div>
+		<div class="col-75">
+			<input type="text" id="card_text_filter" onkeyup="filter()" placeholder="Search in card text..." title="card text contains"><br>
+		</div>
+	</div>
+	<div class="formrow">
+		<div class="col-25">
+			<label for="only_owned_filter">Show only owned cards</label>
+		</div>
+		<div class="col-75">
+			<input type="checkbox" id="only_owned_filter" onchange="filter()"><br>
+		</div>
+	</div>
+	<div class="formrow">
+		<div class="col-25">
+			<label for="mana_colour">Mana colours:</label>
+		</div>
+		<div class="col-75">
+			<select id="mana_colour" multiple class='chosen-select' onchange="filter()">
+				<option value="B">Black</option>
+				<option value="U">Blue</option>
+				<option value="G">Green</option>
+				<option value="R">Red</option>
+				<option value="W">White</option>
+				<option value="NONE">None</option>
+			</select>
+		</div>
 	</div>
 
-	<div class="col-lg-3">
-		<label for="subtypes">Subtypes:</label>
-		<select id="subtypes" multiple class='chosen-select' onchange="filter()">
-			<?php foreach($subtypes as $type) { 
-				if (isset($_GET['main_type']) && $_GET['main_type'] == $type['id']) continue; // it's the main type, not a subtype
-			?>
-				<option value="<?= $type['name'] ?>"><?= $type['name'] ?></option>
-			<?php } ?>
-		</select>
+	<div class="formrow">
+		<div class="col-25">
+			<label for="subtypes">Subtypes:</label>
+		</div>
+		<div class="col-75">
+			<select id="subtypes" multiple class='chosen-select' onchange="filter()">
+				<?php foreach($subtypes as $type) { 
+					if (isset($_GET['main_type']) && $_GET['main_type'] == $type['id']) continue; // it's the main type, not a subtype
+				?>
+					<option value="<?= $type['name'] ?>"><?= $type['name'] ?></option>
+				<?php } ?>
+			</select>
+		</div>
 	</div>
-
+<br>
 </div>
 <table class="table table-striped sortable" id="cards" style="width:90%">
 <col style="width:5%">

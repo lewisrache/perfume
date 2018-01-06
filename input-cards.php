@@ -1,11 +1,46 @@
+<html>
+<head>
+<meta charset="utf-8">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+<link rel="stylesheet" href="bootstrap-sortable-master/Contents/bootstrap-sortable.css">
+<link rel="stylesheet" href="bootstrap-chosen-master/bootstrap-chosen.css">
+<script src="bootstrap-sortable-master/Scripts/bootstrap-sortable.js"></script>
+<script src="bootstrap-sortable-master/Scripts/moment.min.js"></script>
+<script src="http://harvesthq.github.io/chosen/chosen.jquery.js"></script>
+
+<script>
+$(function() {
+	$('.chosen-select').chosen();
+	$('.chosen-select-deselect').chosen({ allow_single_deselect: true });
+});
+</script>
+<body>
+<?php 
+	require_once("api/includes.php");
+	$all_sets = Set::getAll();
+?>
+<div class="col-lg-3">
+	<form method="GET" id="import_cards">
+		<label for="sets_to_import">Sets to import</label>
+		<select id="sets_to_import" multiple name="import_sets[]" class="chosen-select">
+			<?php foreach($all_sets as $set) { ?>
+				<option value="<?= $set['name'] ?>"><?= $set['name'] . " (".$set['code'].")" ?></option>
+			<?php } ?>
+		</select>
+		<input type="submit" value="Import">
+	</form>
+</div>
+
 <?php
 
 require_once("api/includes.php");
 
-if (isset($_GET['import_set'])) {
-	$valid_sets = array(
-		$_GET['import_set']
-	);
+if (isset($_GET['import_sets'])) {
+	$valid_sets = $_GET['import_sets'];
+	if (!is_array($valid_sets)) {
+		$valid_sets = array($valid_sets);
+	}
 } else {
 	$valid_sets = array(
 		"Unstable",
@@ -18,6 +53,7 @@ if (isset($_GET['import_set'])) {
 		"Amonkhet",
 		"Hour of Devastation",
 		"Ixalan");
+	die("Choose a set!");
 }
 
 $handle = fopen("data/AllSets.json", 'r');
@@ -65,7 +101,7 @@ foreach($sets as $set) {
 	foreach($details->cards as $card) {
 		$card_obj = new Card();
 		$card_obj->flavour = (isset($card->flavor) ? $card->flavor : "");
-		$card_obj->manaCost = (isset($card->manaCost) ? $card->manaCost : NULL);
+		$card_obj->manacost = (isset($card->manaCost) ? $card->manaCost : NULL);
 		$card_obj->text = (isset($card->text) ? $card->text : "");
 		$card_obj->power = (isset($card->power) ? $card->power : "");
 		$card_obj->toughness = (isset($card->toughness) ? $card->toughness : "");
@@ -103,3 +139,9 @@ foreach($sets as $set) {
 	}
 }
 
+?>
+<div class="col-lg-3">
+	<input type="button" onclick="window.location='add_cards.php'" value="Go add cards to your library!"/>
+</div>
+</body>
+</html>
