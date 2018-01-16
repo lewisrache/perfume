@@ -1,7 +1,7 @@
 make UI for sets
 - a page that shows you available sets and which ones you have
 - you can filter the sets
-- and if you want to add one, click ADD SET, and it will import it
+DONE - and if you want to add one, click ADD SET, and it will import it
 
 Aftermath cards
 - currently they're in separately
@@ -11,5 +11,5 @@ Cards that appear in more than one set
 - have a mode of "combine same cards" or whatever (ones with the same name)
 
 Card UI
-- add ability to do initial search by set. or by owned. not just by type
+DONE - add ability to do initial search by set. or by owned. not just by type
 - add quick-update of card #

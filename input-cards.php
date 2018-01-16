@@ -56,6 +56,8 @@ if (isset($_GET['import_sets'])) {
 	die("Choose a set!");
 }
 
+$sets = array();
+
 $handle = fopen("data/AllSets.json", 'r');
 
 if ($handle) {

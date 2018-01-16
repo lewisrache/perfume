@@ -67,6 +67,9 @@ class Card {
 
 	public function update() {
 		// TODO - gonna assume no updates on input...
+		// except i messed up the mana...
+		$query = "UPDATE card SET manacost = :cost WHERE id = :id";
+		self::$dbh->execQuery($query, array(':cost'=>$this->manacost, ':id'=>$this->id));
 	}
 
 	public static function setNumOwned($card_id, $num_owned) {
@@ -122,8 +125,39 @@ class Card {
 
 	}
 
-	public function search() {
+	public static function search(CardSearch $cs) {
+		if (!isset(self::$dbh)) {
+			self::$dbh = DB::getDB();
+		}
+		$tables = "sets, card";
+		$data = array();
+		if (isset($cs->main_type)) {
+			$tables .= ", card_types, type ";
+		}
+		$where = "sets.id = card.set_id";
+		if (isset($cs->main_type)) {
+			$where .= " AND type.id = :id
+				AND card_types.type_id = type.id
+				AND card_types.card_id = card.id";
+			$data[':id'] = $cs->main_type;
+		}
+		if (isset($cs->set)) {
+			$where .= " AND sets.id = :set_id";
+			$data[':set_id'] = $cs->set;
+		}
+		if (isset($cs->owned)) {
+			$where .= " AND card.num_own > 0";
+		}
+		if (isset($cs->text)) {
+			$where .= " AND card.text like :text";
+			$data[':text'] = '%'.$cs->text.'%';
+		}
+		$card_selection_query = "SELECT sets.name as set_name, card.name as card_name, card.text, card.manacost, card.type, card.power, card.toughness, card.rarity, card.num_own
+			FROM $tables
+			WHERE $where";
+		$cards = self::$dbh->execQuery($card_selection_query, $data);
 
+		return $cards;
 	}
 
 	public function createOrUpdate() {
@@ -150,4 +184,13 @@ class Card {
 		// TODO - add type to type list?
 	}
 	
+}
+
+class CardSearch {
+
+	public $set;
+	public $owned;
+	public $text;
+	public $main_type;
+
 }

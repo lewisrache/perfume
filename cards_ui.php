@@ -121,46 +121,92 @@ function filter() {
 <body>
 <?php
 
-if (!isset($_GET['main_type'])) {
-	$card_selection_query = "SELECT sets.name as set_name, card.name as card_name, card.text, card.manacost, card.type, card.power, card.toughness, card.rarity, card.num_own
-		FROM sets, card
-		WHERE sets.id = card.set_id";
-	$data = array();
-} else {
-	$card_selection_query = "SELECT sets.name as set_name, card.name as card_name, card.text, card.manacost, card.type, card.power, card.toughness, card.rarity, card.num_own
-		FROM sets, card, card_types, type
-		WHERE type.id = :id
-		AND card_types.type_id = type.id
-		AND card_types.card_id = card.id
-		AND sets.id = card.set_id";
-	$data = array(':id'=>$_GET['main_type']);
+require_once(__DIR__ . "/api/includes.php");
+
+$card_search = new CardSearch();
+
+if (isset($_GET['set']) && $_GET['set'] !== "all") {
+	$card_search->set = $_GET['set'];
 }
+if (isset($_GET['restrict_to_owned'])) {
+	$card_search->owned = $_GET['restrict_to_owned'];
+}
+if (isset($_GET['search_in_text']) && $_GET['search_in_text'] !== "") {
+	$card_search->text = $_GET['search_in_text'];
+}
+if (isset($_GET['main_type']) && $_GET['main_type'] !== "all") {
+	$card_search->main_type = $_GET['main_type'];
+}
+
 $dir = 'sqlite:api/mtg.db';
 $dbh  = new PDO($dir) or die("cannot open the database");
 
-$card_selection_stmt = $dbh->prepare($card_selection_query);
-foreach($data as $var => $val) {
-	$card_selection_stmt->bindParam($var, $val);
-}
-$card_selection_stmt->execute();
-$card_selection = $card_selection_stmt->fetchAll();
+$card_selection = Card::search($card_search);
 
 //$zombies = $dbh->query("select sets.name as set_name, card.name as card_name, card.text, card.manacost, card.type, card.power, card.toughness, card.rarity from sets, card, card_types, type where type.name = 'Zombie' and card_types.type_id = type.id and card_types.card_id = card.id and sets.id = card.set_id;");
 $types = $dbh->query("select type.id, type.name from type order by type.name asc");
 $subtypes = $dbh->query("select type.id, type.name from type order by type.name asc");
+$all_sets = Set::getAll();
 ?>
-<div class="main_search_type col-lg-3">
+<div class="main_search_type">
+	<div class="page-header">
+	  <h3 style="padding-left: 15px;">BASE CARD SELECTION</h3>
+	</div>
 	<form method="GET" id="main_type_search">
-		<label for="main_type_select">Main Type (reloads page)</label>
-		<select id="main_type_select" name="main_type" class="chosen-select" onchange="$('#main_type_search').submit()">
-			<?php foreach($types as $type) { ?>
-				<option value="<?= $type['id'] ?>" <?= ((isset($_GET['main_type']) && $_GET['main_type'] == $type['id']) ? 'selected="selected"' : '') ?>><?= $type['name'] ?></option>
-			<?php } ?>
-		</select>
+		<div class="formrow">
+			<div class="col-25">
+				<label for="main_type_select">Main Type:</label>
+			</div>
+			<div class="col-75">
+				<select id="main_type_select" name="main_type" class="chosen-select">
+					<option value="all" <?= (isset($card_search->main_type) ? '' : 'selected="selected"') ?>>SHOW ALL TYPES</option>
+					<?php foreach($types as $type) { ?>
+						<option value="<?= $type['id'] ?>" <?= ((isset($_GET['main_type']) && $_GET['main_type'] == $type['id']) ? 'selected="selected"' : '') ?>><?= $type['name'] ?></option>
+					<?php } ?>
+				</select>
+			</div>
+		</div>
+		<div class="formrow">
+			<div class="col-25">
+				<label for="sets_selection">Set:</label>
+			</div>
+			<div class="col-75">
+				<select id="sets_selection" name="set" class="chosen-select">
+					<option value="all" <?= (isset($card_search->set) ? '' : 'selected="selected"') ?>>SHOW ALL SETS</option>
+					<?php foreach($all_sets as $set) { ?>
+						<option value="<?= $set['id'] ?>"<?= ((isset($_GET['set']) && $_GET['set'] == $set['id']) ? 'selected="selected"' : '') ?>><?= $set['name'] . " (".$set['code'].")" ?></option>
+					<?php } ?>
+				</select>
+			</div>
+		</div>
+		<div class="formrow">
+			<div class="col-25">
+				<label for="main_card_text">Search in card text:</label>
+			</div>
+			<div class="col-75">
+				<input type="text" id="main_card_text" name="search_in_text" placeholder="Search in card text..." title="card text contains" <?= (isset($_GET['search_in_text']) ? "value=\"{$_GET['search_in_text']}\"" : '') ?>><br>
+			</div>
+		</div>
+		<div class="formrow">
+			<div class="col-25">
+				<label for="only_owned_base">Show only owned cards</label>
+			</div>
+			<div class="col-75">
+				<input type="checkbox" id="only_owned_base" name="restrict_to_owned" <?= (isset($_GET['restrict_to_owned']) ? 'checked' : '') ?>><br>
+			</div>
+		</div>
+		<div class="formrow">
+			<div class="col-25">
+				<input type="submit" value="Set Base">
+			</div>
+		</div>
 	</form>
 </div>
 <hr>
 <div class="filters">
+	<div class="page-header">
+	  <h3 style="padding-left: 15px;">FURTHER FILTERING OPTIONS</h3>
+	</div>
 	<div class="formrow">
 		<div class="col-25">
 			<label for="card_name_filter">Search for card name:</label>
@@ -177,7 +223,7 @@ $subtypes = $dbh->query("select type.id, type.name from type order by type.name 
 			<input type="text" id="card_text_filter" onkeyup="filter()" placeholder="Search in card text..." title="card text contains"><br>
 		</div>
 	</div>
-	<div class="formrow">
+	<div class="formrow" <?= (isset($_GET['restrict_to_owned']) ? 'hidden' : '') ?>>
 		<div class="col-25">
 			<label for="only_owned_filter">Show only owned cards</label>
 		</div>
