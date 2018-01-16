@@ -78,7 +78,7 @@ if ($handle) {
 		} else if ($in_block) {
 			$sets[$name] .= $line;
 		} else { 
-			if ($start_block && preg_match('/"name": "([\w\s]*)"/', $line, $matches)) {
+			if ($start_block && preg_match('/"name": "([^"]*)"/', $line, $matches)) {
 				$name = $matches[1];
 				if (in_array($name, $valid_sets)) {
 					$sets[$name] = "{" . $buffer1 . $line;
@@ -93,6 +93,7 @@ if ($handle) {
 }
 
 $colour_codes = array();
+error_log(count($sets)." sets found matching ".json_encode($valid_sets));
 
 foreach($sets as $set) {
 	$json = json_decode($set);
