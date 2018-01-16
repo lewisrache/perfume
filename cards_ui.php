@@ -146,11 +146,11 @@ $card_selection = Card::search($card_search);
 //$zombies = $dbh->query("select sets.name as set_name, card.name as card_name, card.text, card.manacost, card.type, card.power, card.toughness, card.rarity from sets, card, card_types, type where type.name = 'Zombie' and card_types.type_id = type.id and card_types.card_id = card.id and sets.id = card.set_id;");
 $types = $dbh->query("select type.id, type.name from type order by type.name asc");
 $subtypes = $dbh->query("select type.id, type.name from type order by type.name asc");
-$all_sets = Set::getAll();
+$all_sets = Set::getAll(true);
 ?>
 <div class="main_search_type">
 	<div class="page-header">
-	  <h3 style="padding-left: 15px;">BASE CARD SELECTION</h3>
+	  <h3 style="padding-left: 15px; padding-top: 15px;">BASE CARD SELECTION</h3>
 	</div>
 	<form method="GET" id="main_type_search">
 		<div class="formrow">
