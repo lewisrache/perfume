@@ -20,6 +20,9 @@ require_once(__DIR__ . "/api/includes.php");
 $(function() {
 	$('.chosen-select').chosen();
 	$('.chosen-select-deselect').chosen({ allow_single_deselect: true });
+	<?php if (isset($_POST['card_id'])) { ?>
+		$('#update_banner')[0].innerHTML = "Updated ("+$('#card_select option[value=<?= $_POST['card_id'] ?>]')[0].innerHTML + ")";
+	<?php } ?>
 });
 </script>
 
@@ -42,7 +45,7 @@ $cards = $dbh->query("select card.name, card.id, card.num_own, sets.code from ca
 $card_id_to_own = array();
 
 if (isset($card_id)) { ?>
-<div class="updated">Updated</div>
+<div class="updated" id="update_banner">Updated ()</div>
 <?php }?>
 <form id="add_card" method="POST">
 	<div class="col-lg-3" style="float:left">
