@@ -242,6 +242,7 @@ $all_sets = Set::getAll(true);
 				<option value="G">Green</option>
 				<option value="R">Red</option>
 				<option value="W">White</option>
+				<option value="C">Colourless</option>
 				<option value="NONE">None</option>
 			</select>
 		</div>
