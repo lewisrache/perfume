@@ -10,7 +10,7 @@ require_once(__DIR__ . "/api/includes.php");
 <link rel="stylesheet" href="bootstrap-chosen-master/bootstrap-chosen.css">
 <script src="bootstrap-sortable-master/Scripts/bootstrap-sortable.js"></script>
 <script src="bootstrap-sortable-master/Scripts/moment.min.js"></script>
-<script src="http://harvesthq.github.io/chosen/chosen.jquery.js"></script>
+<script src="chosen_v1.8.2/chosen.jquery.js"></script>
 <style>
 .updated {
 	background-color: rgba(141, 255, 138, 0.4);

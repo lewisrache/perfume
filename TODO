@@ -14,3 +14,7 @@ Card UI
 DONE - add ability to do initial search by set. or by owned. not just by type
 - add quick-update of card #
 - add filtering by rarity
+- sort mana properly (so far, have determined it's probably a matter of attaching a custom "sortEngine" to the mana column; see lines 230 and 310 of bootstrap-sortable.js)
+
+Card add
+- right now it's saying it has successfully updated by the presence of a $_POST; make it throw an error if it fails and note that

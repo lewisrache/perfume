@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="bootstrap-chosen-master/bootstrap-chosen.css">
 <script src="bootstrap-sortable-master/Scripts/bootstrap-sortable.js"></script>
 <script src="bootstrap-sortable-master/Scripts/moment.min.js"></script>
-<script src="http://harvesthq.github.io/chosen/chosen.jquery.js"></script>
+<script src="chosen_v1.8.2/chosen.jquery.js"></script>
 <script>
 $(function() {
 	$('.chosen-select').chosen();
