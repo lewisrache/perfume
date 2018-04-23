@@ -152,6 +152,10 @@ class Card {
 			$where .= " AND card.text like :text";
 			$data[':text'] = '%'.$cs->text.'%';
 		}
+		if (isset($cs->rarity)) {
+			$where .= " AND card.rarity = :rarity";
+			$data[':rarity'] = $cs->rarity;
+		}
 		$card_selection_query = "SELECT sets.name as set_name, card.name as card_name, card.text, card.manacost, card.type, card.power, card.toughness, card.rarity, card.num_own
 			FROM $tables
 			WHERE $where";
@@ -192,5 +196,6 @@ class CardSearch {
 	public $owned;
 	public $text;
 	public $main_type;
+	public $rarity;
 
 }

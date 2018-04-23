@@ -137,6 +137,9 @@ if (isset($_GET['search_in_text']) && $_GET['search_in_text'] !== "") {
 if (isset($_GET['main_type']) && $_GET['main_type'] !== "all") {
 	$card_search->main_type = $_GET['main_type'];
 }
+if (isset($_GET['rarity']) && $_GET['rarity'] !== "all") {
+	$card_search->rarity = $_GET['rarity'];
+}
 
 $dir = 'sqlite:api/mtg.db';
 $dbh  = new PDO($dir) or die("cannot open the database");
@@ -175,6 +178,21 @@ $all_sets = Set::getAll(true);
 					<option value="all" <?= (isset($card_search->set) ? '' : 'selected="selected"') ?>>SHOW ALL SETS</option>
 					<?php foreach($all_sets as $set) { ?>
 						<option value="<?= $set['id'] ?>"<?= ((isset($_GET['set']) && $_GET['set'] == $set['id']) ? 'selected="selected"' : '') ?>><?= $set['name'] . " (".$set['code'].")" ?></option>
+					<?php } ?>
+				</select>
+			</div>
+		</div>
+		<div class="formrow">
+			<div class="col-25">
+				<label for="rarity_selection">Rarity:</label>
+			</div>
+			<div class="col-75">
+				<select id="rarity_selection" name="rarity" class="chosen-select">
+					<option value="all" <?= (isset($card_search->rarity) ? '' : 'selected="selected"') ?>>SHOW ALL RARITIES</option>
+					<?php 
+					$all_rarities = array('Common','Uncommon','Rare','Mythic Rare');
+					foreach($all_rarities as $rarity) { ?>
+						<option value="<?= $rarity ?>"<?= ((isset($_GET['rarity']) && $_GET['rarity'] == $rarity) ? 'selected="selected"' : '') ?>><?= $rarity ?></option>
 					<?php } ?>
 				</select>
 			</div>
