@@ -38,6 +38,9 @@ if (isset($_POST['card_id']) && isset($_POST['num_own'])) {
 	$subtypes = $_POST['subtypes'] ?? [];
 	try {
 		$originalSubtypes = json_decode($_POST['orig_subtypes']);
+		if (is_null($originalSubtypes)) {
+			$originalSubtypes = [];
+		}
 	} catch (Exception $e) {
 		$originalSubtypes = [];
 	}
