@@ -18,16 +18,31 @@ $(function() {
 <body>
 <?php 
 	require_once("api/includes.php");
-	$all_sets = Set::getAll();
+if (isset($_GET['coll-name'])) {
+	$set = new Collection($_GET['coll-name']);
+	$set_id = $set->createOrGet();
+}
+	$all_sets = Collection::getAll();
 ?>
 <div class="col-lg-3">
+	<form method="GET" id="new-coll">
+		<label for="coll">New Collection Name</label>
+		<input id="coll" name="coll-name" type="text">
+		<input type="submit" value="Create New Collection">
+	</form>
+</div>
+<div class="col-lg-3">
 	<form method="GET" id="import_cards">
-		<label for="sets_to_import">Sets to import</label>
-		<select id="sets_to_import" multiple name="import_sets[]" class="chosen-select">
+		<label for="sets_to_import">Collection</label>
+		<select id="sets_to_import" multiple name="import_sets" class="chosen-select">
 			<?php foreach($all_sets as $set) { ?>
-				<option value="<?= $set['name'] ?>"><?= $set['name'] . " (".$set['code'].")" ?></option>
+				<option value="<?= $set['name'] ?>"><?= $set['name'] ?></option>
 			<?php } ?>
 		</select>
+		<label for="perf-name">Perfume Name</label>
+		<input id="perf-name" name="perfume-name" type="text">
+		<label for="perf-text">Perfume Notes</label>
+		<input id="perf-text" name="perfume-text" type="text">
 		<input type="submit" value="Import">
 	</form>
 </div>
@@ -36,70 +51,36 @@ $(function() {
 
 require_once("api/includes.php");
 
-if (isset($_GET['import_sets'])) {
+if (isset($_GET['import_sets']) && isset($_GET['perfume-name']) && isset($_GET['perfume-text'])) {
 	$valid_sets = $_GET['import_sets'];
 	if (!is_array($valid_sets)) {
 		$valid_sets = array($valid_sets);
 	}
+	$collection = $_GET['import_sets'];
+	$perfume_name = $_GET['perfume-name'];
+	$perfume_text = $_GET['perfume-text'];
+	
 } else {
-	$valid_sets = array(
-		"Unstable",
-		"Battle for Zendikar",
-		"Oath of the Gatewatch",
-		"Eldritch Moon",
-		"Shadows over Innistrad",
-		"Kaladesh",
-		"Aether Revolt",
-		"Amonkhet",
-		"Hour of Devastation",
-		"Ixalan");
-	die("Choose a set!");
+echo "but why?";
+print_r($_GET);
+	die("Enter information!");
 }
 
-$sets = array();
+$set = new Collection($collection);
+$set_id = $set->createOrGet();
 
-$handle = fopen("data/AllSets.json", 'r');
-
-if ($handle) {
-	$ctr = 0;
-	$start_block = false;
-	$in_block = false;
-	$buffer1 = "";
-	$name = "";
-	while (($line = fgets($handle)) !== false) {
-		if (preg_match('/^\s{2}"/', $line, $matches)) {
-			$buffer1 = $line;
-			$start_block = true;
-		} else if (preg_match('/^\s{2}}/', $line, $matches)) {
-			$in_block = false;
-			if (array_key_exists($name, $sets)) {
-				$sets[$name] .= "}}";
-			}
-		} else if ($in_block) {
-			$sets[$name] .= $line;
-		} else { 
-			if ($start_block && preg_match('/"name": "([^"]*)"/', $line, $matches)) {
-				$name = $matches[1];
-				if (in_array($name, $valid_sets)) {
-					$sets[$name] = "{" . $buffer1 . $line;
-					$in_block = true;
-					$ctr++;
-				}
-			}
-			$start_block = false; 
-		}
-	}
-	fclose($handle);
-}
-
-$colour_codes = array();
-error_log(count($sets)." sets found matching ".json_encode($valid_sets));
-
+$card_obj = new Card();
+$card_obj->text = $perfume_text;
+$card_obj->name = $perfume_name;
+$card_obj->set_id = $set_id;
+$card_id = $card_obj->createOrUpdate();
+// types should be random tags
+/*
 foreach($sets as $set) {
 	$json = json_decode($set);
 	$details = reset($json);
 
-	$set = new Set($details->name, $details->code);
+	$set = new Collection($details->name, $details->code);
 	$set_id = $set->createOrGet();
 	foreach($details->cards as $card) {
 		$card_obj = new Card();
@@ -141,7 +122,7 @@ foreach($sets as $set) {
 		}
 	}
 }
-
+*/
 ?>
 <div class="col-lg-3">
 	<input type="button" onclick="window.location='add_cards.php'" value="Go add cards to your library!"/>

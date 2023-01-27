@@ -27,4 +27,15 @@ class Type {
 		}
 		return $this->id;
 	}
+
+	public static function getAll() {
+		if (!isset(self::$dbh)) {
+			self::$dbh = DB::getDB();
+		}
+
+		$query = "SELECT id, name FROM type ORDER BY name ASC";
+		$result = self::$dbh->execQuery($query);
+
+		return $result;
+	}
 }

@@ -2,7 +2,7 @@
 
 require_once(__DIR__ . "/db.php");
 
-class Set {
+class Collection {
 	public $name;
 	public $code;
 	public $id;
@@ -39,7 +39,7 @@ class Set {
 
 		$where_clause = ($restrict_to_imported ? "WHERE id IN (SELECT DISTINCT set_id FROM card)" : "");
 
-		$query = "SELECT id, name, code FROM sets $where_clause ORDER BY name ASC";
+		$query = "SELECT id, name FROM sets $where_clause ORDER BY name ASC";
 		$result = self::$dbh->execQuery($query);
 
 		return $result;

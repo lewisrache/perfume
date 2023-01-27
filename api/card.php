@@ -131,10 +131,10 @@ class Card {
 		}
 		$tables = "sets, card";
 		$data = array();
-		if (isset($cs->main_type)) {
+		//if (isset($cs->main_type)) {
 			$tables .= ", card_types, type ";
-		}
-		$where = "sets.id = card.set_id";
+		//}
+		$where = "sets.id = card.set_id AND ((card.id = card_types.card_id AND type.id = card_types.type_id) OR card_types.card_id is null)";
 		if (isset($cs->main_type)) {
 			$where .= " AND type.id = :id
 				AND card_types.type_id = type.id
@@ -156,9 +156,10 @@ class Card {
 			$where .= " AND card.rarity = :rarity";
 			$data[':rarity'] = $cs->rarity;
 		}
-		$card_selection_query = "SELECT sets.name as set_name, card.name as card_name, card.text, card.manacost, card.type, card.power, card.toughness, card.rarity, card.num_own
+		$card_selection_query = "SELECT sets.name as set_name, card.name as card_name, card.text, card.manacost, group_concat(type.name) as type, card.power, card.toughness, card.rarity, card.num_own
 			FROM $tables
-			WHERE $where";
+			WHERE $where
+			GROUP BY (card.id)";
 		$cards = self::$dbh->execQuery($card_selection_query, $data);
 
 		return $cards;
@@ -180,6 +181,44 @@ class Card {
 		$query = "INSERT OR IGNORE INTO card_types (card_id, type_id) VALUES (:cid, :tid)";
 		self::$dbh->execQuery($query, array(':cid'=>$this->id, ':tid'=>$type_id));
 		// TODO - add type to type list?
+	}
+
+	public static function addTypes($card_id, $type_ids) {
+		if (!isset(self::$dbh)) {
+			self::$dbh = DB::getDB();
+		}
+		foreach($type_ids as $type_id) {
+			$query = "INSERT OR IGNORE INTO card_types (card_id, type_id) VALUES (:cid, :tid)";
+			self::$dbh->execQuery($query, array(':cid'=>$card_id, ':tid'=>$type_id));
+		}
+		// TODO - add type to type list?
+	}
+
+	public static function removeTypes($card_id, $type_ids) {
+		if (!isset(self::$dbh)) {
+			self::$dbh = DB::getDB();
+		}
+		foreach($type_ids as $type_id) {
+			$query = "DELETE FROM card_types WHERE card_id = :cid AND type_id = :tid";
+			self::$dbh->execQuery($query, array(':cid'=>$card_id, ':tid'=>$type_id));
+		}
+		// TODO - add type to type list?
+	}
+
+	public static function getCardsToTypes() {
+		if (!isset(self::$dbh)) {
+			self::$dbh = DB::getDB();
+		}
+		$query = "SELECT card_id, type_id FROM card_types";
+		$res = self::$dbh->execQuery($query);
+		$types = [];
+		foreach($res as $r) {
+			if (!isset($types[$r['card_id']])) {
+				$types[$r['card_id']] = [];
+			}
+			$types[$r['card_id']][] = $r['type_id'];
+		}
+		return $types;
 	}
 
 	public function addColour($colour_id) {

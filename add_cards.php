@@ -35,13 +35,27 @@ $dbh  = new PDO($dir) or die("cannot open the database");
 if (isset($_POST['card_id']) && isset($_POST['num_own'])) {
 	$card_id = $_POST['card_id'];
 	$num_own = $_POST['num_own'];
-
+	$subtypes = $_POST['subtypes'] ?? [];
+	try {
+		$originalSubtypes = json_decode($_POST['orig_subtypes']);
+	} catch (Exception $e) {
+		$originalSubtypes = [];
+	}
 	$stmt = $dbh->prepare("update card set num_own = :num_own where id = :id");
 	$stmt->execute(array(':num_own'=>$num_own,':id'=>$card_id));
+$to_add = array_filter($subtypes, function($type) use ($originalSubtypes) {
+	return !in_array($type, $originalSubtypes);
+});
+	Card::addTypes($card_id, $to_add);
+$to_remove = array_filter($originalSubtypes, function($type) use ($subtypes) {
+	return !in_array($type, $subtypes);
+});
+	Card::removeTypes($card_id, $to_remove);
 }
 
-
-$cards = $dbh->query("select card.name, card.id, card.num_own, sets.code from card, sets where sets.id = card.set_id order by card.name asc");
+$types = Type::getAll();
+$cards = $dbh->query("select card.name, card.id, card.num_own from card, sets where sets.id = card.set_id order by card.name asc");
+$cards_to_types = Card::getCardsToTypes();
 $card_id_to_own = array();
 
 if (isset($card_id)) { ?>
@@ -50,21 +64,28 @@ if (isset($card_id)) { ?>
 <form id="add_card" method="POST">
 	<div class="col-lg-3" style="float:left">
 	<select name="card_id" id="card_select" class="chosen-select" onchange="updateOwned()">
+		<option value="0">Select a Perfume</option>
 	<?php foreach($cards as $idx => $card) { 
 		$card['num_own'] = ($card['num_own'] == "" ? 0 : $card['num_own']);
 		$card_id_to_own[$card['id']] = $card['num_own'];
-		if (isset($card_id) && $card_id == $card['id']) {
+		/*if (isset($card_id) && $card_id == $card['id']) {
 			$initial_value = $card['num_own'];
-			?><option value="<?= $card['id'] ?>" selected="selected"><?= $card['name'] . " (" . $card['code'] . ")" ?></option><?php
+			?><option value="<?= $card['id'] ?>" selected="selected"><?= $card['name'] ?></option><?php
 		} else {
 			if ($idx === 0) {
 				$initial_value = $card['num_own'];
-			}
-			?><option value="<?= $card['id'] ?>"><?= $card['name'] . " (" . $card['code'] . ")" ?></option><?php
-		}
+			}*/
+			?><option value="<?= $card['id'] ?>"><?= $card['name'] ?></option><?php
+		//}
 	} ?>
 	</select>
-	<input type="number" id="owned" name="num_own" value="<?= $initial_value ?>">
+	<select name="subtypes[]" multiple id="subtype-select" class="chosen-select">
+	<?php foreach($types as $idx => $type) { ?>
+		<option value="<?= $type['id'] ?>"><?= $type['name'] ?></option>
+	<?php } ?>
+	</select>
+	<input type="number" id="owned" name="num_own" value="0">
+	<input type="hidden" id="original-subtypes" name="orig_subtypes" value="[]">
 	<input type="submit" value="Update">
 
 	<br>
@@ -72,26 +93,20 @@ if (isset($card_id)) { ?>
 	<input type="button" onclick="window.location='cards_ui.php'" value="View Library"/>
 	</div>
 </form>
-<div class="col-lg-3" style="float:left">
-<table>
-<tbody>
-<?php
-	$all_sets = Set::getAll(true);
-	foreach($all_sets as $set) {
-		?><tr><td><?= $set['name'] . " (" . $set['code'] . ")" ?></td></tr>
-	<?php }
-?>
-</tbody>
-</table>
-</div>
 <script>
 var cards_to_numbers = Array();
+var cards_to_types = Array();
 <?php foreach($card_id_to_own as $id => $num) { ?>
 	cards_to_numbers[<?= $id ?>] = <?= $num ?>;
+<?php } ?>
+<?php foreach($cards_to_types as $id => $type_id) { ?>
+	cards_to_types[<?= $id ?>] = JSON.parse("<?= json_encode($type_id) ?>");
 <?php } ?>
 function updateOwned() {
 	var card_id = $('#card_select').val();
 	$('#owned').val(cards_to_numbers[card_id]);
+	$('#original-subtypes').val("["+cards_to_types[card_id]+"]");
+	$('#subtype-select').val(cards_to_types[card_id]).trigger('chosen:updated');
 }
 </script>
 </body>

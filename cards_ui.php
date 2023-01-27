@@ -19,25 +19,13 @@ function filter() {
 	subtype_filter = $('#subtypes').val();
 	name_filter = $('#card_name_filter').val().toUpperCase();
 	owned_filter = $('#only_owned_filter').is(':checked');
-	mana_filter = $('#mana_colour').val();
 	text_filter = $('#card_text_filter').val().toUpperCase();
 
 	names = $('.card_name');
 	types = $('.card_type');
-	manas = $('.manacost');
 	texts = $('.card_text');
 	owned = $('.num_owned');
 	for (var i=0;i<names.length;i++) {
-		var mana_show = false;
-		for (var m=0;m<mana_filter.length;m++) {
-			var mana_val = manas[i].getAttribute('data-value');
-			if (mana_val.indexOf(mana_filter[m]) > -1) {
-				mana_show = true;
-			}
-			if (mana_filter[m] == "NONE" && mana_val.search(/{[A-Z]}/) == -1) {
-				mana_show = true;
-			}
-		}
 		var subtype_show = false;
 		for (var s=0;s<subtype_filter.length;s++) {
 			var type_val = types[i].getAttribute('data-value');
@@ -47,7 +35,6 @@ function filter() {
 		}
 		if (names[i].getAttribute('data-value').toUpperCase().indexOf(name_filter) > -1
 			&& texts[i].getAttribute('data-value').toUpperCase().indexOf(text_filter) > -1 
-			&& (mana_show || mana_filter.length == 0)
 			&& (subtype_show || subtype_filter.length == 0)
 			&& (!owned_filter || parseInt(owned[i].getAttribute('data-value')) > 0)
 			) {
@@ -128,17 +115,11 @@ $card_search = new CardSearch();
 if (isset($_GET['set']) && $_GET['set'] !== "all") {
 	$card_search->set = $_GET['set'];
 }
-if (isset($_GET['restrict_to_owned'])) {
-	$card_search->owned = $_GET['restrict_to_owned'];
-}
 if (isset($_GET['search_in_text']) && $_GET['search_in_text'] !== "") {
 	$card_search->text = $_GET['search_in_text'];
 }
 if (isset($_GET['main_type']) && $_GET['main_type'] !== "all") {
 	$card_search->main_type = $_GET['main_type'];
-}
-if (isset($_GET['rarity']) && $_GET['rarity'] !== "all") {
-	$card_search->rarity = $_GET['rarity'];
 }
 
 $dir = 'sqlite:api/mtg.db';
@@ -149,7 +130,7 @@ $card_selection = Card::search($card_search);
 //$zombies = $dbh->query("select sets.name as set_name, card.name as card_name, card.text, card.manacost, card.type, card.power, card.toughness, card.rarity from sets, card, card_types, type where type.name = 'Zombie' and card_types.type_id = type.id and card_types.card_id = card.id and sets.id = card.set_id;");
 $types = $dbh->query("select type.id, type.name from type order by type.name asc");
 $subtypes = $dbh->query("select type.id, type.name from type order by type.name asc");
-$all_sets = Set::getAll(true);
+$all_sets = Collection::getAll(true);
 ?>
 <div class="main_search_type">
 	<div class="page-header">
@@ -171,28 +152,13 @@ $all_sets = Set::getAll(true);
 		</div>
 		<div class="formrow">
 			<div class="col-25">
-				<label for="sets_selection">Set:</label>
+				<label for="sets_selection">Collection:</label>
 			</div>
 			<div class="col-75">
 				<select id="sets_selection" name="set" class="chosen-select">
 					<option value="all" <?= (isset($card_search->set) ? '' : 'selected="selected"') ?>>SHOW ALL SETS</option>
 					<?php foreach($all_sets as $set) { ?>
-						<option value="<?= $set['id'] ?>"<?= ((isset($_GET['set']) && $_GET['set'] == $set['id']) ? 'selected="selected"' : '') ?>><?= $set['name'] . " (".$set['code'].")" ?></option>
-					<?php } ?>
-				</select>
-			</div>
-		</div>
-		<div class="formrow">
-			<div class="col-25">
-				<label for="rarity_selection">Rarity:</label>
-			</div>
-			<div class="col-75">
-				<select id="rarity_selection" name="rarity" class="chosen-select">
-					<option value="all" <?= (isset($card_search->rarity) ? '' : 'selected="selected"') ?>>SHOW ALL RARITIES</option>
-					<?php 
-					$all_rarities = array('Common','Uncommon','Rare','Mythic Rare');
-					foreach($all_rarities as $rarity) { ?>
-						<option value="<?= $rarity ?>"<?= ((isset($_GET['rarity']) && $_GET['rarity'] == $rarity) ? 'selected="selected"' : '') ?>><?= $rarity ?></option>
+						<option value="<?= $set['id'] ?>"<?= ((isset($_GET['set']) && $_GET['set'] == $set['id']) ? 'selected="selected"' : '') ?>><?= $set['name'] ?></option>
 					<?php } ?>
 				</select>
 			</div>
@@ -207,15 +173,7 @@ $all_sets = Set::getAll(true);
 		</div>
 		<div class="formrow">
 			<div class="col-25">
-				<label for="only_owned_base">Show only owned cards</label>
-			</div>
-			<div class="col-75">
-				<input type="checkbox" id="only_owned_base" name="restrict_to_owned" <?= (isset($_GET['restrict_to_owned']) ? 'checked' : '') ?>><br>
-			</div>
-		</div>
-		<div class="formrow">
-			<div class="col-25">
-				<input type="submit" value="Set Base">
+				<input type="submit" value="Collection Base">
 			</div>
 		</div>
 	</form>
@@ -239,30 +197,6 @@ $all_sets = Set::getAll(true);
 		</div>
 		<div class="col-75">
 			<input type="text" id="card_text_filter" onkeyup="filter()" placeholder="Search in card text..." title="card text contains"><br>
-		</div>
-	</div>
-	<div class="formrow" <?= (isset($_GET['restrict_to_owned']) ? 'hidden' : '') ?>>
-		<div class="col-25">
-			<label for="only_owned_filter">Show only owned cards</label>
-		</div>
-		<div class="col-75">
-			<input type="checkbox" id="only_owned_filter" onchange="filter()"><br>
-		</div>
-	</div>
-	<div class="formrow">
-		<div class="col-25">
-			<label for="mana_colour">Mana colours:</label>
-		</div>
-		<div class="col-75">
-			<select id="mana_colour" multiple class='chosen-select' onchange="filter()">
-				<option value="B">Black</option>
-				<option value="U">Blue</option>
-				<option value="G">Green</option>
-				<option value="R">Red</option>
-				<option value="W">White</option>
-				<option value="C">Colourless</option>
-				<option value="NONE">None</option>
-			</select>
 		</div>
 	</div>
 
@@ -292,7 +226,7 @@ $all_sets = Set::getAll(true);
 <col style="width:5%">
 <thead>
 <tr>
-<th>SET</th><th>CARD</th><th>TEXT</th><th>MANA</th><th>TYPE</th><th>P/T</th><th>NUM</th>
+<th>SET</th><th>CARD</th><th>TEXT</th><th>TYPE</th><th>NUM</th>
 </tr>
 </thead>
 <tbody>
@@ -303,9 +237,7 @@ foreach($card_selection as $z) {
 		<td><?= $z['set_name'] ?></td>
 		<td class="card_name"><?= $z['card_name'] ?></td>
 		<td class="card_text"><?= str_replace("\n",'<br><br>',$z['text']) ?></td>
-		<td class="manacost"><?= $z['manacost'] ?></td>
 		<td class="card_type"><?= htmlspecialchars($z['type']) ?></td>
-		<td><?= ($z['power'] !== "") ? $z['power']."/".$z['toughness'] : "" ?></td>
 		<td class="num_owned"><?= $z['num_own'] ?></td>
 	</tr>
 <?php } ?>
