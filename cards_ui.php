@@ -237,7 +237,7 @@ foreach($card_selection as $z) {
 		<td><?= $z['set_name'] ?></td>
 		<td class="card_name"><?= $z['card_name'] ?></td>
 		<td class="card_text"><?= str_replace("\n",'<br><br>',$z['text']) ?></td>
-		<td class="card_type"><?= htmlspecialchars($z['type']) ?></td>
+		<td class="card_type"><?= htmlspecialchars($z['type'] ?? '') ?></td>
 		<td class="num_owned"><?= $z['num_own'] ?></td>
 	</tr>
 <?php } ?>

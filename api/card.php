@@ -129,36 +129,34 @@ class Card {
 		if (!isset(self::$dbh)) {
 			self::$dbh = DB::getDB();
 		}
-		$tables = "sets, card";
+		$tables = "card LEFT JOIN sets on card.set_id = sets.id LEFT JOIN card_types ON card_types.card_id = card.id LEFT JOIN type ON type.id = card_types.type_id";
 		$data = array();
-		//if (isset($cs->main_type)) {
-			$tables .= ", card_types, type ";
-		//}
-		$where = "sets.id = card.set_id AND ((card.id = card_types.card_id AND type.id = card_types.type_id) OR card_types.card_id is null)";
+		$where = [];
 		if (isset($cs->main_type)) {
-			$where .= " AND type.id = :id
+			$where[] = "type.id = :id
 				AND card_types.type_id = type.id
 				AND card_types.card_id = card.id";
 			$data[':id'] = $cs->main_type;
 		}
 		if (isset($cs->set)) {
-			$where .= " AND sets.id = :set_id";
+			$where[] = "sets.id = :set_id";
 			$data[':set_id'] = $cs->set;
 		}
 		if (isset($cs->owned)) {
-			$where .= " AND card.num_own > 0";
+			$where[] = "card.num_own > 0";
 		}
 		if (isset($cs->text)) {
-			$where .= " AND card.text like :text";
+			$where[] = "card.text like :text";
 			$data[':text'] = '%'.$cs->text.'%';
 		}
 		if (isset($cs->rarity)) {
-			$where .= " AND card.rarity = :rarity";
+			$where[] = "card.rarity = :rarity";
 			$data[':rarity'] = $cs->rarity;
 		}
+		$whereStr = empty($where) ? "" : "WHERE " . join(' AND ',$where);
 		$card_selection_query = "SELECT sets.name as set_name, card.name as card_name, card.text, card.manacost, group_concat(type.name) as type, card.power, card.toughness, card.rarity, card.num_own
 			FROM $tables
-			WHERE $where
+			$whereStr
 			GROUP BY (card.id)";
 		$cards = self::$dbh->execQuery($card_selection_query, $data);
 
