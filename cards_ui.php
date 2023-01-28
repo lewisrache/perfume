@@ -14,6 +14,14 @@ $(function() {
 	$('.chosen-select-deselect').chosen({ allow_single_deselect: true });
 });
 
+function deletePerfume(id, name) {
+	console.log('deleting '+id);
+	if (confirm('Are you sure you want to delete '+name+' perfume?')) {
+		$("#perf-id").val(id);
+		$("#delete-perfume").submit();
+	}
+}
+
 function filter() {
 	var name_filter, subtype_filter, owned_filter, mana_filter, text_filter, names, types, manas, texts, owned;
 	subtype_filter = $('#subtypes').val();
@@ -110,6 +118,12 @@ function filter() {
 
 require_once(__DIR__ . "/api/includes.php");
 
+if (isset($_POST['perfume'])) {
+	$dir = 'sqlite:api/mtg.db';
+	$dbh  = new PDO($dir) or die("cannot open the database");
+	$dbh->query("DELETE FROM card WHERE id = ".(int)$_POST['perfume']);
+}
+
 $card_search = new CardSearch();
 
 if (isset($_GET['set']) && $_GET['set'] !== "all") {
@@ -132,6 +146,9 @@ $types = $dbh->query("select type.id, type.name from type order by type.name asc
 $subtypes = $dbh->query("select type.id, type.name from type order by type.name asc");
 $all_sets = Collection::getAll(true);
 ?>
+<form id="delete-perfume" method="POST">
+	<input name="perfume" id="perf-id" value="" type="number" hidden>
+</form>
 <div class="main_search_type">
 	<div class="page-header">
 	  <h3 style="padding-left: 15px; padding-top: 15px;">BASE CARD SELECTION</h3>
@@ -226,7 +243,7 @@ $all_sets = Collection::getAll(true);
 <col style="width:5%">
 <thead>
 <tr>
-<th>SET</th><th>CARD</th><th>TEXT</th><th>TYPE</th><th>NUM</th>
+<th>SET</th><th>CARD</th><th>TEXT</th><th>TYPE</th><th>NUM</th><th>ACTIONS</th>
 </tr>
 </thead>
 <tbody>
@@ -239,6 +256,7 @@ foreach($card_selection as $z) {
 		<td class="card_text"><?= str_replace("\n",'<br><br>',$z['text']) ?></td>
 		<td class="card_type"><?= htmlspecialchars($z['type'] ?? '') ?></td>
 		<td class="num_owned"><?= $z['num_own'] ?></td>
+		<td class="card_text"><input type="button" value="Delete" onclick="deletePerfume(<?= $z['id'] ?>, '<?= $z['card_name'] ?>')"></td>
 	</tr>
 <?php } ?>
 </tbody>
