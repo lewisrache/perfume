@@ -61,8 +61,6 @@ if (isset($_GET['import_sets']) && isset($_GET['perfume-name']) && isset($_GET['
 	$perfume_text = $_GET['perfume-text'];
 	
 } else {
-echo "but why?";
-print_r($_GET);
 	die("Enter information!");
 }
 
