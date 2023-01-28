@@ -74,56 +74,8 @@ $card_obj->text = $perfume_text;
 $card_obj->name = $perfume_name;
 $card_obj->set_id = $set_id;
 $card_obj->refnum = strtolower(str_replace(' ','-',$perfume_name));
+$card_obj->flavour = (isset($_GET['flavour']) ? $_GET['flavour'] : "");
 $card_id = $card_obj->createOrUpdate();
-// types should be random tags
-/*
-foreach($sets as $set) {
-	$json = json_decode($set);
-	$details = reset($json);
-
-	$set = new Collection($details->name, $details->code);
-	$set_id = $set->createOrGet();
-	foreach($details->cards as $card) {
-		$card_obj = new Card();
-		$card_obj->flavour = (isset($card->flavor) ? $card->flavor : "");
-		$card_obj->manacost = (isset($card->manaCost) ? $card->manaCost : NULL);
-		$card_obj->text = (isset($card->text) ? $card->text : "");
-		$card_obj->power = (isset($card->power) ? $card->power : "");
-		$card_obj->toughness = (isset($card->toughness) ? $card->toughness : "");
-		$card_obj->name = $card->name;
-		$card_obj->type_str = $card->type;
-		$card_obj->set_id = $set_id;
-		$card_obj->rarity = $card->rarity;
-		$card_obj->layout = $card->layout;
-		$card_obj->refnum = $card->id;
-
-		$card_id = $card_obj->createOrUpdate();
-
-		foreach($card->types as $type_name) {
-			$type = new Type($type_name);
-			$type_id = $type->createOrGet();
-			$card_obj->addType($type_id);
-		}
-		if (isset($card->subtypes)) {
-			foreach($card->subtypes as $type_name) {
-				$type = new Type($type_name);
-				$type_id = $type->createOrGet();
-				$card_obj->addType($type_id);
-			}
-		}
-
-		if (isset($card->colorIdentity)) {
-			foreach($card->colorIdentity as $colour_code) {
-				if (!array_key_exists($colour_code, $colour_codes)) {
-					$colour = new Colour();
-					$colour_codes[$colour_code] = $colour->get($colour_code);
-				}
-				$card_obj->addColour($colour_codes[$colour_code]);
-			}
-		}
-	}
-}
-*/
 ?>
 <div class="col-lg-3">
 	<input type="button" onclick="window.location='add_cards.php'" value="Go add cards to your library!"/>

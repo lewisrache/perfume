@@ -66,10 +66,17 @@ class Card {
 	}
 
 	public function update() {
-		// TODO - gonna assume no updates on input...
-		// except i messed up the mana...
-		$query = "UPDATE card SET manacost = :cost WHERE id = :id";
-		self::$dbh->execQuery($query, array(':cost'=>$this->manacost, ':id'=>$this->id));
+		$query = "UPDATE card 
+			SET name = :name, text = :text, set_id = :set_id, flavour = :flavour
+			WHERE id = :id";
+		$args = [
+			':name' => $this->name,
+			':text' => $this->text,
+			':set_id' => $this->set_id,
+			':flavour' => $this->flavour,
+			':id' => $this->id
+		];
+		self::$dbh->execQuery($query, $args);
 	}
 
 	public static function setNumOwned($card_id, $num_owned) {
@@ -154,7 +161,7 @@ class Card {
 			$data[':rarity'] = $cs->rarity;
 		}
 		$whereStr = empty($where) ? "" : "WHERE " . join(' AND ',$where);
-		$card_selection_query = "SELECT card.id, sets.name as set_name, card.name as card_name, card.text, card.manacost, group_concat(type.name) as type, card.power, card.toughness, card.rarity, card.num_own
+		$card_selection_query = "SELECT card.id, card.set_id, sets.name as set_name, card.name as card_name, card.text, card.manacost, group_concat(type.name) as type, card.power, card.toughness, card.rarity, card.num_own, card.flavour, card.refnum
 			FROM $tables
 			$whereStr
 			GROUP BY (card.id)";

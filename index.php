@@ -11,11 +11,12 @@
 </head>
 <body>
 <div class="col-lg-3">
-	<input type="button" onclick="window.location='collection_manager.php'" value="Manage Collections"/>
-	<input type="button" onclick="window.location='type_manager.php'" value="Manage Types"/>
-	<input type="button" onclick="window.location='input-cards.php'" value="Create New Perfumes"/>
-	<input type="button" onclick="window.location='add_cards.php'" value="Assign Categories and Number"/>
-	<input type="button" onclick="window.location='cards_ui.php'" value="View Perfumes"/>
+	<br><input type="button" onclick="window.location='collection_manager.php'" value="Manage Collections"/>
+	<br><input type="button" onclick="window.location='type_manager.php'" value="Manage Types"/>
+	<br>!!!NEW!!!<input type="button" onclick="window.location='add_perfumes.php'" value="Create/Update Perfumes"/>
+	<br><input type="button" onclick="window.location='input-cards.php'" value="Create New Perfumes"/>
+	<br><input type="button" onclick="window.location='add_cards.php'" value="Assign Categories and Number"/>
+	<br><input type="button" onclick="window.location='cards_ui.php'" value="View Perfumes"/>
 </div>
 </body>
 </html>
