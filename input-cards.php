@@ -24,6 +24,8 @@ if (isset($_GET['coll-name'])) {
 }
 	$all_sets = Collection::getAll();
 ?>
+<input type="button" onclick="window.location='index.php'" value="Return Home"/>
+
 <div class="col-lg-3">
 	<form method="GET" id="new-coll">
 		<label for="coll">New Collection Name</label>

@@ -12,10 +12,10 @@
 $(function() {
 });
 
-function deleteCollection(id, name) {
-	if (confirm('Are you sure you want to delete the '+name+' collection?')) {
-		$("#coll-id").val(id);
-		$("#delete-collection").submit();
+function deleteType(id, name) {
+	if (confirm('Are you sure you want to delete the '+name+' type?')) {
+		$("#typecat-id").val(id);
+		$("#delete-type").submit();
 	}
 }
 </script>
@@ -28,27 +28,28 @@ require_once(__DIR__ . "/api/includes.php");
 $dir = 'sqlite:api/mtg.db';
 $dbh  = new PDO($dir) or die("cannot open the database");
 
-if (isset($_POST['collection_id'])) {
-	$dbh->query("DELETE FROM sets WHERE id = ".(int)$_POST['collection_id']);
+if (isset($_POST['type_id'])) {
+	$dbh->query("DELETE FROM type WHERE id = ".(int)$_POST['type_id']);
 }
 
-if (isset($_POST['coll-name'])) {
-	$set = new Collection($_POST['coll-name']);
-	$set_id = $set->createOrGet();
+if (isset($_POST['typecat-name'])) {
+	$type = new Type($_POST['typecat-name']);
+	$type_id = $type->createOrGet();
 }
 
-$all_sets = Collection::getAll(false);
+$all_sets = Type::getAll();
 ?>
+
 <input type="button" onclick="window.location='index.php'" value="Return Home"/>
 
-<form id="delete-collection" method="POST">
-	<input name="collection_id" id="coll-id" value="" type="number" hidden>
+<form id="delete-type" method="POST">
+	<input name="type_id" id="typecat-id" value="" type="number" hidden>
 </form>
 <div class="col-lg-6">
-	<form method="POST" id="new-coll">
-		<label for="coll">New Collection Name:</label>
-		<input id="coll" name="coll-name" type="text"></br>
-		<input type="submit" value="Create New Collection">
+	<form method="POST" id="new-typecat">
+		<label for="typecat">New Type Name:</label>
+		<input id="typecat" name="typecat-name" type="text"></br>
+		<input type="submit" value="Create New Type">
 	</form>
 </div>
 <table class="table table-striped sortable" id="cards" style="width:90%">
@@ -66,12 +67,12 @@ $all_sets = Collection::getAll(false);
 </thead>
 <tbody>
 <?php
-foreach($all_sets as $collection) {
+foreach($all_sets as $type) {
 ?>
 	<tr class="<?= strtolower(str_replace(' ','_',$z['rarity'])) ?>_card">
-		<td><?= $collection['name'] ?></td>
+		<td><?= $type['name'] ?></td>
 		<td class="card_name"><?= "COMING SOON?" ?></td>
-		<td class="card_text"><input type="button" value="Delete" onclick="deleteCollection(<?= $collection['id'] ?>, '<?= $collection['name'] ?>')"></td>
+		<td class="card_text"><input type="button" value="Delete" onclick="deleteType(<?= $type['id'] ?>, '<?= $type['name'] ?>')"></td>
 	</tr>
 <?php } ?>
 </tbody>

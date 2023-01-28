@@ -64,6 +64,8 @@ $card_id_to_own = array();
 if (isset($card_id)) { ?>
 <div class="updated" id="update_banner">Updated ()</div>
 <?php }?>
+<input type="button" onclick="window.location='index.php'" value="Return Home"/>
+
 <form id="add_card" method="POST">
 	<div class="col-lg-3" style="float:left">
 	<select name="card_id" id="card_select" class="chosen-select" onchange="updateOwned()">

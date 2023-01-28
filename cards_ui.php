@@ -146,6 +146,8 @@ $types = $dbh->query("select type.id, type.name from type order by type.name asc
 $subtypes = $dbh->query("select type.id, type.name from type order by type.name asc");
 $all_sets = Collection::getAll(true);
 ?>
+<input type="button" onclick="window.location='index.php'" value="Return Home"/>
+
 <form id="delete-perfume" method="POST">
 	<input name="perfume" id="perf-id" value="" type="number" hidden>
 </form>
