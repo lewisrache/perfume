@@ -73,6 +73,7 @@ $card_obj = new Card();
 $card_obj->text = $perfume_text;
 $card_obj->name = $perfume_name;
 $card_obj->set_id = $set_id;
+$card_obj->refnum = strtolower(str_replace(' ','-',$perfume_name));
 $card_id = $card_obj->createOrUpdate();
 // types should be random tags
 /*
