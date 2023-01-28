@@ -12,10 +12,11 @@
 $(function() {
 });
 
-function deleteCollection(id) {
-	console.log('deleting '+id);
-	$("#coll-id").val(id);
-	$("#delete-collection").submit();
+function deleteCollection(id, name) {
+	if (confirm('Are you sure you want to delete the '+name+' collection?')) {
+		$("#coll-id").val(id);
+		$("#delete-collection").submit();
+	}
 }
 </script>
 </head>
@@ -31,11 +32,23 @@ if (isset($_POST['collection_id'])) {
 	$dbh->query("DELETE FROM sets WHERE id = ".(int)$_POST['collection_id']);
 }
 
-$all_sets = Collection::getAll(true);
+if (isset($_POST['coll-name'])) {
+	$set = new Collection($_POST['coll-name']);
+	$set_id = $set->createOrGet();
+}
+
+$all_sets = Collection::getAll(false);
 ?>
 <form id="delete-collection" method="POST">
 	<input name="collection_id" id="coll-id" value="" type="number" hidden>
 </form>
+<div class="col-lg-6">
+	<form method="POST" id="new-coll">
+		<label for="coll">New Collection Name:</label>
+		<input id="coll" name="coll-name" type="text"></br>
+		<input type="submit" value="Create New Collection">
+	</form>
+</div>
 <table class="table table-striped sortable" id="cards" style="width:90%">
 <col style="width:5%">
 <col style="width:18%">
@@ -56,7 +69,7 @@ foreach($all_sets as $collection) {
 	<tr class="<?= strtolower(str_replace(' ','_',$z['rarity'])) ?>_card">
 		<td><?= $collection['name'] ?></td>
 		<td class="card_name"><?= "COMING SOON?" ?></td>
-		<td class="card_text"><input type="button" value="Delete" onclick="deleteCollection(<?= $collection['id'] ?>)"></td>
+		<td class="card_text"><input type="button" value="Delete" onclick="deleteCollection(<?= $collection['id'] ?>, '<?= $collection['name'] ?>')"></td>
 	</tr>
 <?php } ?>
 </tbody>
