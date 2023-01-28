@@ -154,7 +154,7 @@ class Card {
 			$data[':rarity'] = $cs->rarity;
 		}
 		$whereStr = empty($where) ? "" : "WHERE " . join(' AND ',$where);
-		$card_selection_query = "SELECT sets.name as set_name, card.name as card_name, card.text, card.manacost, group_concat(type.name) as type, card.power, card.toughness, card.rarity, card.num_own
+		$card_selection_query = "SELECT card.id, sets.name as set_name, card.name as card_name, card.text, card.manacost, group_concat(type.name) as type, card.power, card.toughness, card.rarity, card.num_own
 			FROM $tables
 			$whereStr
 			GROUP BY (card.id)";
