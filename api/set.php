@@ -20,13 +20,13 @@ class Collection {
 	}
 
 	public function createOrGet() {
-		$query = "SELECT id FROM sets WHERE code = :code";
-		$result = self::$dbh->execQuery($query, array(':code'=>$this->code));
+		$query = "SELECT id FROM sets WHERE name = :name";
+		$result = self::$dbh->execQuery($query, array(':name'=>$this->name));
 		if (count($result) > 0) {
 			$this->id = $result[0]['id'];
 		} else {
-			$query = "INSERT INTO sets (name, code) VALUES (:name, :code)";
-			$result = self::$dbh->execQuery($query, array(':name'=>$this->name, ':code'=>$this->code));
+			$query = "INSERT INTO sets (name) VALUES (:name)";
+			$result = self::$dbh->execQuery($query, array(':name'=>$this->name));
 			$this->id = self::$dbh->lastInsertId();
 		}
 		return $this->id;
