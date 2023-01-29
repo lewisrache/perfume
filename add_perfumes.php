@@ -57,13 +57,14 @@ if (isset($_POST['card_id'])) {
 	$cardObj->set_id = $perfume_collection;
 	$cardObj->num_own = $num_own;
 	$cardObj->flavour = $flavour;
-	if ($card_id !== "NEW" && $card_id > 0) {
-		$cardObj->id = $card_id;
+	if ($card_id === "NEW" || $card_id === 0) {
 		$cardObj->refnum = strtolower(str_replace(' ','-',$perfume_name));
 	} else {
+		$cardObj->id = $card_id;
 		$cardObj->refnum = $_POST['refnum'];
 	}
 	$card_id = $cardObj->createOrUpdate();
+
 //	$stmt = $dbh->prepare("update card set num_own = :num_own where id = :id");
 //	$stmt->execute(array(':num_own'=>$num_own,':id'=>$card_id));
 	$to_add = array_filter($subtypes, function($type) use ($originalSubtypes) {
@@ -160,6 +161,7 @@ function updateOwned() {
 		$('#ref-num').val(cards_to_refnums[card_id]);
 	} else {
 		$('#ref-num').val('');
+		$('#owned').val(0);
 	}
 }
 </script>
