@@ -238,14 +238,14 @@ $all_sets = Collection::getAll(true);
 <table class="table table-striped sortable" id="cards" style="width:90%">
 <col style="width:5%">
 <col style="width:18%">
-<col style="width:37%">
-<col style="width:10%">
+<col style="width:30%">
+<col style="width:30%">
 <col style="width:20%">
 <col style="width:5%">
 <col style="width:5%">
 <thead>
 <tr>
-<th>SET</th><th>CARD</th><th>TEXT</th><th>TYPE</th><th>NUM</th><th>ACTIONS</th>
+<th>COLLECTION</th><th>PERFUME</th><th>NOTES</th><th>FLAVOUR</th><th>TAGS</th><th>NUM</th><th>ACTIONS</th>
 </tr>
 </thead>
 <tbody>
@@ -256,6 +256,7 @@ foreach($card_selection as $z) {
 		<td><?= $z['set_name'] ?></td>
 		<td class="card_name"><?= $z['card_name'] ?></td>
 		<td class="card_text"><?= str_replace("\n",'<br><br>',$z['text']) ?></td>
+		<td class="card_text"><?= str_replace("\n",'<br><br>',$z['flavour'] ?? '') ?></td>
 		<td class="card_type"><?= htmlspecialchars($z['type'] ?? '') ?></td>
 		<td class="num_owned"><?= $z['num_own'] ?></td>
 		<td class="card_text"><input type="button" value="Delete" onclick="deletePerfume(<?= $z['id'] ?>, '<?= $z['card_name'] ?>')"></td>
