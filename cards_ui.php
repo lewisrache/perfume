@@ -256,10 +256,10 @@ foreach($card_selection as $z) {
 		<td><?= $z['set_name'] ?></td>
 		<td class="card_name"><?= $z['card_name'] ?></td>
 		<td class="card_text"><?= str_replace("\n",'<br><br>',$z['text']) ?></td>
-		<td class="card_text"><?= str_replace("\n",'<br><br>',$z['flavour'] ?? '') ?></td>
+		<td class="card_flav"><?= str_replace("\n",'<br><br>',$z['flavour'] ?? '') ?></td>
 		<td class="card_type"><?= htmlspecialchars($z['type'] ?? '') ?></td>
 		<td class="num_owned"><?= $z['num_own'] ?></td>
-		<td class="card_text"><input type="button" value="Delete" onclick="deletePerfume(<?= $z['id'] ?>, '<?= $z['card_name'] ?>')"></td>
+		<td class="actions"><input type="button" value="Delete" onclick="deletePerfume(<?= $z['id'] ?>, '<?= $z['card_name'] ?>')"></td>
 	</tr>
 <?php } ?>
 </tbody>
