@@ -54,7 +54,7 @@ class Card {
 			':power' => $this->power,
 			':toughness' => $this->toughness,
 			':type' => $this->type_str,
-			':num_own' => 0,
+			':num_own' => $this->num_own,
 			':rarity' => $this->rarity,
 			':set_id' => $this->set_id,
 			':layout' => $this->layout
