@@ -67,13 +67,14 @@ class Card {
 
 	public function update() {
 		$query = "UPDATE card 
-			SET name = :name, text = :text, set_id = :set_id, flavour = :flavour
+			SET name = :name, text = :text, set_id = :set_id, flavour = :flavour, num_own = :num_own
 			WHERE id = :id";
 		$args = [
 			':name' => $this->name,
 			':text' => $this->text,
 			':set_id' => $this->set_id,
 			':flavour' => $this->flavour,
+			':num_own' => $this->num_own,
 			':id' => $this->id
 		];
 		self::$dbh->execQuery($query, $args);
