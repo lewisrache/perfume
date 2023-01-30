@@ -146,7 +146,7 @@ var cards_to_refnums = Array();
 	cards_to_refnums[<?= $card['id'] ?>] = "<?= $card['refnum'] ?>";
 <?php } ?>
 <?php foreach($cards_to_types as $id => $type_id) { ?>
-	cards_to_types[<?= $id ?>] = JSON.parse("<?= json_encode($type_id) ?>");
+	cards_to_types[<?= $id ?>] = JSON.parse('<?= json_encode($type_id) ?>');
 <?php } ?>
 function updateOwned() {
 	var card_id = $('#card_select').val();
