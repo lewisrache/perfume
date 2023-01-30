@@ -10,14 +10,24 @@
 <script src="http://harvesthq.github.io/chosen/chosen.jquery.js"></script>
 </head>
 <body>
+<?php
+require_once(__DIR__ . "/api/includes.php");
+
+if (isset($_POST['yes_delete'])) {
+	$dir = 'sqlite:api/mtg.db';
+	$dbh  = new PDO($dir) or die("cannot open the database");
+	$dbh->query("DELETE FROM card_types WHERE card_id = 'NEW'");
+
+	header('Location: clean_data.php');
+	die();
+}
+		
+?>
 <div class="col-lg-3">
-	<br><input type="button" onclick="window.location='collection_manager.php'" value="Manage Collections"/>
-	<br><input type="button" onclick="window.location='type_manager.php'" value="Manage Types"/>
-	<br>!!!NEW!!!<input type="button" onclick="window.location='add_perfumes.php'" value="Create/Update Perfumes"/>
-	<br><input type="button" onclick="window.location='input-cards.php'" value="Create New Perfumes"/>
-	<br><input type="button" onclick="window.location='add_cards.php'" value="Assign Categories and Number"/>
-	<br><input type="button" onclick="window.location='cards_ui.php'" value="View Perfumes"/>
-	<br><input type="button" onclick="window.location='clean_data.php'" value="Clean Data (CAREFUL)"/>
+	<form id="delete_problems" method="POST">
+		<input type="hidden" name="yes_delete" value="true">
+		<input type="submit" value="Yes, Delete">
+	</form>
 </div>
 </body>
 </html>
