@@ -141,8 +141,8 @@ var cards_to_refnums = Array();
 <?php } ?>
 <?php foreach($perfumes as $card) { ?>
 	cards_to_sets[<?= $card['id'] ?>] = <?= $card['set_id'] ?>;
-	cards_to_text[<?= $card['id'] ?>] = "<?= $card['text'] ?>";
-	cards_to_flavour[<?= $card['id'] ?>] = "<?= $card['flavour'] ?>";
+	cards_to_text[<?= $card['id'] ?>] = "<?= addslashes($card['text'] ?? '') ?>";
+	cards_to_flavour[<?= $card['id'] ?>] = "<?= addslashes($card['flavour'] ?? '') ?>";
 	cards_to_refnums[<?= $card['id'] ?>] = "<?= $card['refnum'] ?>";
 <?php } ?>
 <?php foreach($cards_to_types as $id => $type_id) { ?>
