@@ -29,6 +29,34 @@ function filter() {
 	owned_filter = $('#only_owned_filter').is(':checked');
 	text_filter = $('#card_text_filter').val().toUpperCase();
 
+	// use_exact_match is only for text_filter.
+	var use_exact_match = !$('#exact_match_checkbox').prop('checked'); // for whatever reason, NO = true.
+	var text_filter_passes = true;
+	let text_filters;
+	let regexp;
+	let regex_and = false; // assume we want OR by default.
+
+	if (!use_exact_match) {
+		// If we're not using exact-match, we want to do regex matching.
+		// We create the RegExp object here so we don't have to do it more than once.
+
+		// determine AND by &&.
+		if (text_filter.indexOf('&&') > 0) {
+			regex_and = true;
+			text_filters = text_filter.split('&&');
+		} else {
+			text_filters = text_filter.split(',');
+		}
+
+		if (text_filters[text_filters.length-1].match(/^\s*$/)) {
+			// the last filter is still being typed up; it's only whitespace.
+			text_filters.pop(); // so remove it.
+		}
+		// Put them back together, but joined by '|' for regex OR. Also, remove the spaces.
+		let new_text_filter = text_filters.join('|').replace('| ','|');
+		regexp = new RegExp(new_text_filter, 'g');
+	}
+
 	names = $('.card_name');
 	types = $('.card_type');
 	texts = $('.card_text');
@@ -41,8 +69,22 @@ function filter() {
 				subtype_show = true;
 			}
 		}
+		// if we're matching on more than one thing, we go in here.
+		if (!use_exact_match) {
+			let number_of_matches = [...texts[i].getAttribute('data-value').toUpperCase().matchAll(regexp)].length;
+			if (regex_and) {
+				// if we want an AND, it needs to match ALL.
+				text_filter_passes = number_of_matches === text_filters.length;
+			} else {
+				// for an OR, just needs to match at least one.
+				text_filter_passes = number_of_matches > 0;
+			}
+		} else {
+			text_filter_passes = texts[i].getAttribute('data-value').toUpperCase().indexOf(text_filter) > -1;
+		}
+		// check if all filters pass; if yes, we show the row; if no, we hide the row.
 		if (names[i].getAttribute('data-value').toUpperCase().indexOf(name_filter) > -1
-			&& texts[i].getAttribute('data-value').toUpperCase().indexOf(text_filter) > -1 
+			&& text_filter_passes
 			&& (subtype_show || subtype_filter.length == 0)
 			&& (!owned_filter || parseInt(owned[i].getAttribute('data-value')) > 0)
 			) {
@@ -111,6 +153,113 @@ function filter() {
         margin-top: 0;
     }
 }
+
+/* For the toggle... */
+.button-cover {
+  height: 100px;
+  margin: 20px;
+  background-color: #fff;
+  box-shadow: 0 10px 20px -8px #c5d6d6;
+  border-radius: 4px;
+}
+
+.button-cover:before {
+  counter-increment: button-counter;
+  content: counter(button-counter);
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  color: #d7e3e3;
+  font-size: 12px;
+  line-height: 1;
+  padding: 5px;
+}
+
+.button-cover,
+.knobs,
+.layer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.button {
+  position: relative;
+  top: 50%;
+  width: 74px;
+  height: 36px;
+  margin: -33px auto 0 250px;
+  overflow: hidden;
+}
+
+.button.r,
+.button.r .layer {
+  border-radius: 100px;
+}
+
+.button.b2 {
+  border-radius: 2px;
+}
+
+.checkbox {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.knobs {
+  z-index: 2;
+}
+
+.layer {
+  width: 100%;
+  background-color: #ebf7fc;
+  transition: 0.3s ease all;
+  z-index: 1;
+}
+
+/* exact_match button */
+#exact_match .knobs:before {
+  content: "YES";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 28px;
+  height: 27px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1;
+  padding: 9px 4px;
+  background-color: #03a9f4;
+  border-radius: 50%;
+  transition: 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15) all;
+}
+
+#exact_match .checkbox:checked + .knobs:before {
+  content: "NO";
+  left: 42px;
+  background-color: #f44336;
+}
+
+#exact_match .checkbox:checked ~ .layer {
+  background-color: #fcebeb;
+}
+
+#exact_match .knobs,
+#exact_match .knobs:before,
+#exact_match .layer {
+  transition: 0.3s ease all;
+}
+
 </style>
 </head>
 <body>
@@ -215,7 +364,13 @@ $all_sets = Collection::getAll(true);
 			<label for="card_text_filter">Search in card text:</label>
 		</div>
 		<div class="col-75">
-			<input type="text" id="card_text_filter" onkeyup="filter()" placeholder="Search in card text..." title="card text contains"><br>
+			<input type="text" id="card_text_filter" onkeyup="filter()" placeholder="Search in card text..." title="card text contains">
+EXACT: 
+			<div class="button r" id="exact_match">
+				<input type="checkbox" class="checkbox" id="exact_match_checkbox" onChange="filter()" />
+				<div class="knobs" data-content="YES"></div>
+				<div class="layer"></div>
+			</div>
 		</div>
 	</div>
 
